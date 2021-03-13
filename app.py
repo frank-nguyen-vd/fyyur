@@ -227,10 +227,11 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
   # TODO: implement genres to take multiple string objects
-  # TODO: insert form data as a new Venue record in the db, instead
+  
   error = False
   data = {}
   try:
+    # DONE: insert form data as a new Venue record in the db, instead
     req_body = request.form
     new_venue = Venue(
       name=req_body['name'],
