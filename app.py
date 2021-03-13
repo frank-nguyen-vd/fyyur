@@ -29,7 +29,10 @@ db.create_all()
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-
+music_shows = db.Table('music_shows',
+  db.Column('artist_id', db.Integer, db.ForeignKey('Artist.id'), primary_key=True),
+  db.Column('venue_id', db.Integer, db.ForeignKey('Venue.id'), primary_key=True)
+)
 class Venue(db.Model):
     __tablename__ = 'Venue'
 
@@ -47,8 +50,9 @@ class Venue(db.Model):
     def __repr__(self):
       return f'<Venue: {self.id}, {self.name}, {self.city}, {self.state}, {self.address}, {self.phone}, {self.genres}, {self.image_link}, {self.facebook_link}>'
 
-
+# DONE: Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 class Artist(db.Model):
+    # DONE: implement any missing fields, as a database migration using Flask-Migrate
     __tablename__ = 'Artist'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -60,13 +64,10 @@ class Artist(db.Model):
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
 
+    venues = db.relationship('Venue', secondary=music_shows, backref=db.backref('artists', lazy=True))
+
     def __repr__(self):
       return f'<Artist: {self.id}, {self.name}, {self.city}, {self.state}, {self.phone}, {self.genres}, {self.image_link}, {self.facebook_link}>'
-
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
-
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 
 #----------------------------------------------------------------------------#
 # Filters.
