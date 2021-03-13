@@ -226,13 +226,41 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+  # TODO: implement genres to take multiple string objects
   # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
+  error = False
+  data = {}
+  try:
+    req_body = request.form
+    new_venue = Venue(
+      name=req_body['name'],
+      city=req_body['city'],
+      state=req_body['state'],
+      address=req_body['address'],
+      phone=req_body['phone'],
+      genres=req_body['genres'],
+      image_link=req_body['image_link'],
+      facebook_link=req_body['facebook_link'],
+    )
+    db.session.add(new_venue)
+    db.session.commit()
+    
+    data['name'] = new_venue.name
+  except:
+    error = True
+    db.session.rollback()
+  finally:
+    db.session.close()
 
-  # on successful db insert, flash success
-  flash('Venue ' + request.form['name'] + ' was successfully listed!')
-  # TODO: on unsuccessful db insert, flash an error instead.
-  # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+  if error:
+    # DONE: modify data to be the data object returned from db insertion
+    # DONE: on unsuccessful db insert, flash an error instead.
+    flash('An error occurred. Venue ' + data.name + ' could not be listed.')
+  else:
+    # on successful db insert, flash success
+    flash('Venue ' + request.form['name'] + ' was successfully listed!')
+  
+  # e.g., 
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
   return render_template('pages/home.html')
 
