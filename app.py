@@ -150,8 +150,8 @@ def search_venues():
     search_term = request.form.get("search_term")
     venues = Venue.query.filter(Venue.name.ilike("%" + search_term + "%")).all()
     data = []
-    for venue in venues:
-        data.append({"id": venue.id, "name": venue.name, "num_upcoming_shows": 0})
+    for venue in venues:        
+        data.append({"id": venue.id, "name": venue.name})
 
     response = {"count": len(data), "data": data}
     return render_template(
