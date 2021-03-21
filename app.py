@@ -161,36 +161,89 @@ def search_venues():
     )
 
 
+def find_upcoming_shows(venue_id=None, artist_id=None):
+    if venue_id == None and artist_id == None:
+        return None
+
+    upcoming_shows = []
+    if venue_id != None:
+        venue = Venue.query.get(venue_id)
+        music_shows = venue.shows
+        now = datetime.now()
+        for music_show in music_shows:
+            start_time = datetime.strptime(music_show.start_time, "%Y-%m-%d %H:%M:%S")
+            if start_time > now:
+                upcoming_shows.append(
+                    {
+                        "artist_id": music_show.artist_id,
+                        "artist_name": music_show.artist.name,
+                        "artist_image_link": music_show.artist.image_link,
+                        "start_time": music_show.start_time,
+                    }
+                )
+    elif artist_id != None:
+        artist = Artist.query.get(artist_id)
+        music_shows = artist.shows
+        now = datetime.now()
+        for music_show in music_shows:
+            start_time = datetime.strptime(music_show.start_time, "%Y-%m-%d %H:%M:%S")
+            if start_time > now:
+                upcoming_shows.append(
+                    {
+                        "venue_id": music_show.venue_id,
+                        "venue_name": music_show.venue.name,
+                        "venue_image_link": music_show.venue.image_link,
+                        "start_time": music_show.start_time,
+                    }
+                )
+    return upcoming_shows
+    
+def find_past_shows(venue_id=None, artist_id=None):
+    if venue_id == None and artist_id == None:
+        return None
+
+    past_shows = []
+    if venue_id != None:
+        venue = Venue.query.get(venue_id)
+        music_shows = venue.shows
+        now = datetime.now()
+        for music_show in music_shows:
+            start_time = datetime.strptime(music_show.start_time, "%Y-%m-%d %H:%M:%S")
+            if start_time <= now:
+                past_shows.append(
+                    {
+                        "artist_id": music_show.artist_id,
+                        "artist_name": music_show.artist.name,
+                        "artist_image_link": music_show.artist.image_link,
+                        "start_time": music_show.start_time,
+                    }
+                )
+    elif artist_id != None:
+        artist = Artist.query.get(artist_id)
+        music_shows = artist.shows
+        now = datetime.now()
+        for music_show in music_shows:
+            start_time = datetime.strptime(music_show.start_time, "%Y-%m-%d %H:%M:%S")
+            if start_time <= now:
+                past_shows.append(
+                    {
+                        "venue_id": music_show.venue_id,
+                        "venue_name": music_show.venue.name,
+                        "venue_image_link": music_show.venue.image_link,
+                        "start_time": music_show.start_time,
+                    }
+                )
+    return past_shows
+
+
 @app.route("/venues/<int:venue_id>")
 def show_venue(venue_id):
     # shows the venue page with the given venue_id
     # DONE: replace with real venue data from the venues table, using venue_id
 
-    venue = Venue.query.get(venue_id)
-    music_shows = venue.shows
-    past_shows = []
-    upcoming_shows = []
-    now = datetime.now()
-    for music_show in music_shows:
-        start_time = datetime.strptime(music_show.start_time, "%Y-%m-%d %H:%M:%S")
-        if start_time > now:
-            upcoming_shows.append(
-                {
-                    "artist_id": music_show.artist_id,
-                    "artist_name": music_show.artist.name,
-                    "artist_image_link": music_show.artist.image_link,
-                    "start_time": music_show.start_time,
-                }
-            )
-        else:
-            past_shows.append(
-                {
-                    "artist_id": music_show.artist_id,
-                    "artist_name": music_show.artist.name,
-                    "artist_image_link": music_show.artist.image_link,
-                    "start_time": music_show.start_time,
-                }
-            )
+    venue = Venue.query.get(venue_id)    
+    past_shows = find_past_shows(venue_id=venue_id)
+    upcoming_shows = find_upcoming_shows(venue_id=venue_id)
 
     data = {
         "id": venue.id,
@@ -311,31 +364,9 @@ def show_artist(artist_id):
     # shows the venue page with the given venue_id
     # DONE: replace with real venue data from the venues table, using venue_id
 
-    artist = Artist.query.get(artist_id)
-    music_shows = artist.shows
-    past_shows = []
-    upcoming_shows = []
-    now = datetime.now()
-    for music_show in music_shows:
-        start_time = datetime.strptime(music_show.start_time, "%Y-%m-%d %H:%M:%S")
-        if start_time > now:
-            upcoming_shows.append(
-                {
-                    "venue_id": music_show.venue_id,
-                    "venue_name": music_show.venue.name,
-                    "venue_image_link": music_show.venue.image_link,
-                    "start_time": music_show.start_time,
-                }
-            )
-        else:
-            past_shows.append(
-                {
-                    "venue_id": music_show.venue_id,
-                    "venue_name": music_show.venue.name,
-                    "venue_image_link": music_show.venue.image_link,
-                    "start_time": music_show.start_time,
-                }
-            )
+    artist = Artist.query.get(artist_id)    
+    past_shows = find_past_shows(artist_id=artist_id)
+    upcoming_shows = find_upcoming_shows(artist_id=artist_id)
 
     data = {
         "id": artist.id,
