@@ -278,7 +278,7 @@ def create_venue_form():
 
 @app.route("/venues/create", methods=["POST"])
 def create_venue_submission():
-    # TODO: implement genres to take multiple string objects
+    # DONE: implement genres to take multiple string objects
 
     error = False
     data = {}
@@ -502,7 +502,7 @@ def create_artist_submission():
 @app.route("/shows")
 def shows():
     # displays list of shows at /shows
-    # TODO: replace with real venues data.
+    # DONE: replace with real venues data.
     #       num_shows should be aggregated based on number of upcoming shows per venue.
     shows = MusicShow.query.all()
     data = []
