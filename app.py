@@ -30,10 +30,10 @@ db.create_all()
 # Models.
 #----------------------------------------------------------------------------#
 class MusicShow(db.Model):
-  __tablename__ = 'MusicShow'
+  __tablename__ = 'music_show'
   id = db.Column(db.Integer, primary_key=True)
-  venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
-  artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
+  venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'), nullable=False)
+  artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'), nullable=False)
   start_time = db.Column(db.String(120))
 
   def __repr__(self):
@@ -41,7 +41,7 @@ class MusicShow(db.Model):
 
 
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+    __tablename__ = 'venue'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -62,7 +62,7 @@ class Venue(db.Model):
 # DONE: Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 class Artist(db.Model):
     # DONE: implement any missing fields, as a database migration using Flask-Migrate
-    __tablename__ = 'Artist'
+    __tablename__ = 'artist'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -190,6 +190,7 @@ def show_venue(venue_id):
     "past_shows_count": 0,
     "upcoming_shows_count": 0,
   }
+  
   data3={
     "id": 3,
     "name": "Park Square Live Music & Coffee",
