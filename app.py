@@ -291,7 +291,7 @@ def create_venue_submission():
             state=req_body["state"],
             address=req_body["address"],
             phone=req_body["phone"],
-            genres=req_body["genres"],
+            genres=req_body.getlist("genres"),
             image_link=req_body["image_link"],
             facebook_link=req_body["facebook_link"],
         )
@@ -456,7 +456,7 @@ def create_artist_form():
 
 @app.route("/artists/create", methods=["POST"])
 def create_artist_submission():
-    # TODO: implement genres to take multiple string objects
+    # DONE: implement genres to take multiple string objects
 
     error = False
     data = {}
@@ -468,7 +468,7 @@ def create_artist_submission():
             city=req_body["city"],
             state=req_body["state"],
             phone=req_body["phone"],
-            genres=req_body["genres"],
+            genres=req_body.getlist("genres"),
             image_link=req_body["image_link"],
             facebook_link=req_body["facebook_link"],
         )
@@ -476,9 +476,6 @@ def create_artist_submission():
         db.session.commit()
 
         data["name"] = new_artist.name
-
-        test = Artist.query.all()
-        print(test)
     except:
         error = True
         db.session.rollback()
