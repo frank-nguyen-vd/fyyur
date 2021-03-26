@@ -28,6 +28,20 @@
         <small>Ctrl+Click to select multiple</small>
         {{ form.genres(class_ = 'form-control', placeholder='Genres, separated by commas', autofocus = true) }}
       </div>
+      <div class="form-group">        
+        <label for="seeking_venue">Seeking Venue</label>
+        <br/>
+        {% for option in form.seeking_venue %}
+            <tr>
+                <td>{{ option }}</td>
+                <td>{{ option.label }}</td>
+            </tr>
+        {% endfor %}
+      </div>      
+      <div class="form-group">
+          <label for="seeking_description">Seeking Description</label>
+          {{ form.seeking_description(class_ = 'form-control', placeholder='', autofocus = true) }}
+      </div>
       <div class="form-group">
           <label for="image_link">Image Link</label>
           {{ form.image_link(class_ = 'form-control', placeholder='http://', autofocus = true) }}

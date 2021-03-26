@@ -77,11 +77,12 @@ class Artist(db.Model):
     genres = db.Column(db.ARRAY(db.String()))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-
+    seeking_venue = db.Column(db.Boolean)
+    seeking_description = db.Column(db.String(120))
     shows = db.relationship("MusicShow", backref="artist", lazy=True)
 
     def __repr__(self):
-        return f"<Artist: {self.id}, {self.name}, {self.city}, {self.state}, {self.phone}, {self.genres}, {self.image_link}, {self.facebook_link}>"
+        return f"<Artist: {self.id}, {self.name}, {self.city}, {self.state}, {self.phone}, {self.genres}, {self.seeking_venue}, {self.seeking_description}, {self.image_link}, {self.facebook_link}>"
 
 
 # ----------------------------------------------------------------------------#
@@ -390,6 +391,7 @@ def show_artist(artist_id):
 @app.route("/artists/<int:artist_id>/edit", methods=["GET"])
 def edit_artist(artist_id):
     form = ArtistForm()
+    artist = Artist.query.get(artist_id)
     artist = {
         "id": 4,
         "name": "Guns N Petals",
@@ -458,7 +460,7 @@ def create_artist_submission():
     # DONE: implement genres to take multiple string objects
 
     error = False
-    data = {}
+    new_artist_name = "[undefined]"
     try:
         # DONE: insert form data as a new Venue record in the db, instead
         req_body = request.form
@@ -468,14 +470,15 @@ def create_artist_submission():
             state=req_body["state"],
             phone=req_body["phone"],
             genres=req_body.getlist("genres"),
+            seeking_venue=req_body["seeking_venue"] == "True",
+            seeking_description=req_body["seeking_description"],
             image_link=req_body["image_link"],
             facebook_link=req_body["facebook_link"],
         )
+        new_artist_name = new_artist.name
         db.session.add(new_artist)
         db.session.commit()
-
-        data["name"] = new_artist.name
-    except:
+    except:        
         error = True
         db.session.rollback()
     finally:
@@ -484,10 +487,10 @@ def create_artist_submission():
     if error:
         # DONE: modify data to be the data object returned from db insertion
         # DONE: on unsuccessful db insert, flash an error instead.
-        flash("An error occurred. Artist " + data.name + " could not be listed.")
+        flash("An error occurred. Artist " + new_artist_name + " could not be listed.")
     else:
         # on successful db insert, flash success
-        flash("Artist " + request.form["name"] + " was successfully listed!")
+        flash("Artist " + new_artist_name + " was successfully listed!")
 
     # e.g.,
     # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
