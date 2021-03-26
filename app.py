@@ -150,7 +150,7 @@ def search_venues():
     search_term = request.form.get("search_term")
     venues = Venue.query.filter(Venue.name.ilike("%" + search_term + "%")).all()
     data = []
-    for venue in venues:        
+    for venue in venues:
         data.append({"id": venue.id, "name": venue.name})
 
     response = {"count": len(data), "data": data}
@@ -197,7 +197,8 @@ def find_upcoming_shows(venue_id=None, artist_id=None):
                     }
                 )
     return upcoming_shows
-    
+
+
 def find_past_shows(venue_id=None, artist_id=None):
     if venue_id == None and artist_id == None:
         return None
@@ -241,7 +242,7 @@ def show_venue(venue_id):
     # shows the venue page with the given venue_id
     # DONE: replace with real venue data from the venues table, using venue_id
 
-    venue = Venue.query.get(venue_id)    
+    venue = Venue.query.get(venue_id)
     past_shows = find_past_shows(venue_id=venue_id)
     upcoming_shows = find_upcoming_shows(venue_id=venue_id)
 
@@ -339,19 +340,17 @@ def artists():
 
 @app.route("/artists/search", methods=["POST"])
 def search_artists():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+    # DONE: implement search on artists with partial string search. Ensure it is case-insensitive.
     # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
     # search for "band" should return "The Wild Sax Band".
-    response = {
-        "count": 1,
-        "data": [
-            {
-                "id": 4,
-                "name": "Guns N Petals",
-                "num_upcoming_shows": 0,
-            }
-        ],
-    }
+
+    search_term = request.form.get("search_term")
+    artists = Artist.query.filter(Artist.name.ilike("%" + search_term + "%")).all()
+    data = []
+    for artist in artists:
+        data.append({"id": artist.id, "name": artist.name})
+
+    response = {"count": len(data), "data": data}
     return render_template(
         "pages/search_artists.html",
         results=response,
@@ -364,7 +363,7 @@ def show_artist(artist_id):
     # shows the venue page with the given venue_id
     # DONE: replace with real venue data from the venues table, using venue_id
 
-    artist = Artist.query.get(artist_id)    
+    artist = Artist.query.get(artist_id)
     past_shows = find_past_shows(artist_id=artist_id)
     upcoming_shows = find_upcoming_shows(artist_id=artist_id)
 
