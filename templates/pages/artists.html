@@ -1,16 +1,22 @@
 {% extends 'layouts/main.html' %}
 {% block title %}Fyyur | Artists{% endblock %}
 {% block content %}
-<ul class="items">
+
+<table>	
 	{% for artist in artists %}
-	<li>
-		<a href="/artists/{{ artist.id }}">
+	<tr>
+		<td>
 			<i class="fas fa-users"></i>
-			<div class="item">
-				<h5>{{ artist.name }}</h5>
-			</div>
-		</a>
-	</li>
+		</td>
+		<td>
+			<a href="/artists/{{ artist.id }}">			
+				<div class="item"><h5>{{ artist.name }}</h5></div>				
+			</a>
+		</td>
+		<td>
+			<a href="/artists/{{ artist.id }}/edit" title="Edit"><i class="fas fa-pen"></i></a>
+		</td>		
+	</tr>
 	{% endfor %}
-</ul>
+</table>
 {% endblock %}
