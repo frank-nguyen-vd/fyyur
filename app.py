@@ -6,7 +6,7 @@ from datetime import datetime
 import json
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for
+from flask import Flask, render_template, request, Response, flash, redirect, url_for, jsonify
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
@@ -106,7 +106,7 @@ app.jinja_env.filters["datetime"] = format_datetime
 # ----------------------------------------------------------------------------#
 
 
-@app.route("/")
+@app.route("/", methods=['POST', 'GET', 'DELETE'])
 def index():
     return render_template("pages/home.html")
 
@@ -322,13 +322,22 @@ def create_venue_submission():
 
 @app.route("/venues/<venue_id>", methods=["DELETE"])
 def delete_venue(venue_id):
-    # TODO: Complete this endpoint for taking a venue_id, and using
+    # DONE: Complete this endpoint for taking a venue_id, and using
     # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
 
     # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
     # clicking that button delete it from the db then redirect the user to the homepage
-    return None
+    error = False
+    try:
+        Venue.query.filter_by(id=venue_id).delete()
+        db.session.commit()
+    except:
+        error = True
+        db.session.rollback()
+    finally:
+        db.session.close()
 
+    return redirect(url_for("index"))
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -398,8 +407,30 @@ def edit_artist(artist_id):
 
 @app.route("/artists/<int:artist_id>/edit", methods=["POST"])
 def edit_artist_submission(artist_id):
-    # TODO: take values from the form submitted, and update existing
+    # DONE: take values from the form submitted, and update existing
     # artist record with ID <artist_id> using the new attributes
+
+    error = False
+    try:
+        req_body = request.form
+
+        artist = Artist.query.get(artist_id)
+        artist.name = req_body["name"]
+        artist.city = req_body["city"]
+        artist.state = req_body["state"]
+        artist.phone = req_body["phone"]
+        artist.genres = req_body.getlist("genres")
+        artist.seeking_venue = bool(req_body["seeking_venue"])
+        artist.seeking_description = req_body["seeking_description"]
+        artist.image_link = req_body["image_link"]
+        artist.facebook_link = req_body["facebook_link"]
+
+        db.session.commit()
+    except:
+        error = True
+        db.session.rollback()
+    finally:
+        db.session.close()
 
     return redirect(url_for("show_artist", artist_id=artist_id))
 
@@ -418,7 +449,7 @@ def edit_venue_submission(venue_id):
     # DONE: take values from the form submitted, and update existing
     # venue record with ID <venue_id> using the new attributes
     error = False
-    try:        
+    try:
         req_body = request.form
 
         venue = Venue.query.get(venue_id)
@@ -429,13 +460,13 @@ def edit_venue_submission(venue_id):
         venue.phone = req_body["phone"]
         venue.genres = req_body.getlist("genres")
         venue.image_link = req_body["image_link"]
-        venue.facebook_link = req_body['facebook_link']
-        
+        venue.facebook_link = req_body["facebook_link"]
+
         db.session.commit()
     except:
         error = True
         db.session.rollback()
-    finally:        
+    finally:
         db.session.close()
 
     return redirect(url_for("show_venue", venue_id=venue_id))

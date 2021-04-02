@@ -2,10 +2,31 @@
 {% block title %}Venue Search{% endblock %}
 {% block content %}
 <div class="row">
+	<script>
+		function delete_venue(id) {
+			fetch('/venues/' + id, {
+				method: 'DELETE'
+			})
+			.then(response => {
+				if (response.redirected) {
+					window.location.href = response.url;
+				}
+			})			
+		}
+	</script>
 	<div class="col-sm-6">
-		<h1 class="monospace">
-			{{ venue.name }}
-		</h1>
+		<table>
+			<tr>
+				<td>
+					<h1 class="monospace">{{ venue.name }}</h1>
+				</td>
+				<td width="100" align="right">
+					<button class="delete-button" onClick="delete_venue('{{ venue.id }}')">Delete</button>
+				</td>
+			</tr>
+		</table>
+
+		
 		<p class="subtitle">
 			ID: {{ venue.id }}
 		</p>
