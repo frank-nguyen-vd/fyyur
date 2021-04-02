@@ -415,8 +415,29 @@ def edit_venue(venue_id):
 
 @app.route("/venues/<int:venue_id>/edit", methods=["POST"])
 def edit_venue_submission(venue_id):
-    # TODO: take values from the form submitted, and update existing
+    # DONE: take values from the form submitted, and update existing
     # venue record with ID <venue_id> using the new attributes
+    error = False
+    try:        
+        req_body = request.form
+
+        venue = Venue.query.get(venue_id)
+        venue.name = req_body["name"]
+        venue.city = req_body["city"]
+        venue.state = req_body["state"]
+        venue.address = req_body["address"]
+        venue.phone = req_body["phone"]
+        venue.genres = req_body.getlist("genres")
+        venue.image_link = req_body["image_link"]
+        venue.facebook_link = req_body['facebook_link']
+        
+        db.session.commit()
+    except:
+        error = True
+        db.session.rollback()
+    finally:        
+        db.session.close()
+
     return redirect(url_for("show_venue", venue_id=venue_id))
 
 
