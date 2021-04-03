@@ -22,7 +22,7 @@ import logging
 from logging import Formatter, FileHandler
 from forms import VenueForm, ArtistForm, ShowForm
 from flask_migrate import Migrate
-from models import Venue, Artist, MusicShow
+from models import db, Venue, Artist, MusicShow
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -31,7 +31,7 @@ from models import Venue, Artist, MusicShow
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object("config")
-db = SQLAlchemy(app)
+db.init_app(app)
 migrate = Migrate(app, db)
 db.create_all()
 
