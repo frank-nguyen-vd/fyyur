@@ -3,18 +3,26 @@
 # ----------------------------------------------------------------------------#
 
 from datetime import datetime
-import json
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for, jsonify
+from flask import (
+    Flask,
+    render_template,
+    request,
+    Response,
+    flash,
+    redirect,
+    url_for,
+    jsonify,
+)
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 import logging
 from logging import Formatter, FileHandler
-from flask_wtf import Form
-from forms import *
+from forms import VenueForm, ArtistForm, ShowForm
 from flask_migrate import Migrate
+from models import Venue, Artist, MusicShow
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -28,61 +36,6 @@ migrate = Migrate(app, db)
 db.create_all()
 
 # DONE: connect to a local postgresql database
-
-# ----------------------------------------------------------------------------#
-# Models.
-# ----------------------------------------------------------------------------#
-class MusicShow(db.Model):
-    __tablename__ = "music_show"
-    id = db.Column(db.Integer, primary_key=True)
-    venue_id = db.Column(db.Integer, db.ForeignKey("venue.id"), nullable=False)
-    artist_id = db.Column(db.Integer, db.ForeignKey("artist.id"), nullable=False)
-    start_time = db.Column(db.String(120))
-
-    def __repr__(self):
-        return f"<MusicShow: {self.id}, {self.artist_id}, {self.venue_id}, {self.start_time}>"
-
-
-class Venue(db.Model):
-    __tablename__ = "venue"
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.ARRAY(db.String()))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String())
-
-    shows = db.relationship("MusicShow", backref="venue", lazy=True)
-
-    # DONE: implement any missing fields, as a database migration using Flask-Migrate
-    def __repr__(self):
-        return f"<Venue: {self.id}, {self.name}, {self.city}, {self.state}, {self.address}, {self.phone}, {self.genres}, {self.image_link}, {self.facebook_link}>"
-
-
-# DONE: Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-class Artist(db.Model):
-    # DONE: implement any missing fields, as a database migration using Flask-Migrate
-    __tablename__ = "artist"
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.ARRAY(db.String()))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    seeking_venue = db.Column(db.Boolean)
-    seeking_description = db.Column(db.String(120))
-    shows = db.relationship("MusicShow", backref="artist", lazy=True)
-
-    def __repr__(self):
-        return f"<Artist: {self.id}, {self.name}, {self.city}, {self.state}, {self.phone}, {self.genres}, {self.seeking_venue}, {self.seeking_description}, {self.image_link}, {self.facebook_link}>"
 
 
 # ----------------------------------------------------------------------------#
@@ -106,7 +59,7 @@ app.jinja_env.filters["datetime"] = format_datetime
 # ----------------------------------------------------------------------------#
 
 
-@app.route("/", methods=['POST', 'GET', 'DELETE'])
+@app.route("/", methods=["POST", "GET", "DELETE"])
 def index():
     return render_template("pages/home.html")
 
@@ -145,9 +98,11 @@ def venues():
 
 @app.route("/venues/search", methods=["POST"])
 def search_venues():
-    # DONE: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for Hop should return "The Musical Hop".
-    # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
+    # DONE: implement search on artists with partial string search.
+    # Ensure it is case-insensitive.
+    # Seach for Hop should return "The Musical Hop".
+    # Search for "Music" should return "The Musical Hop"
+    # and "Park Square Live Music & Coffee"
     search_term = request.form.get("search_term")
     venues = Venue.query.filter(Venue.name.ilike("%" + search_term + "%")).all()
     data = []
@@ -163,11 +118,11 @@ def search_venues():
 
 
 def find_upcoming_shows(venue_id=None, artist_id=None):
-    if venue_id == None and artist_id == None:
+    if venue_id is None and artist_id is None:
         return None
 
     upcoming_shows = []
-    if venue_id != None:
+    if venue_id is not None:
         venue = Venue.query.get(venue_id)
         music_shows = venue.shows
         now = datetime.now()
@@ -182,7 +137,7 @@ def find_upcoming_shows(venue_id=None, artist_id=None):
                         "start_time": music_show.start_time,
                     }
                 )
-    elif artist_id != None:
+    elif artist_id is not None:
         artist = Artist.query.get(artist_id)
         music_shows = artist.shows
         now = datetime.now()
@@ -201,11 +156,11 @@ def find_upcoming_shows(venue_id=None, artist_id=None):
 
 
 def find_past_shows(venue_id=None, artist_id=None):
-    if venue_id == None and artist_id == None:
+    if venue_id is None and artist_id is None:
         return None
 
     past_shows = []
-    if venue_id != None:
+    if venue_id is not None:
         venue = Venue.query.get(venue_id)
         music_shows = venue.shows
         now = datetime.now()
@@ -220,7 +175,7 @@ def find_past_shows(venue_id=None, artist_id=None):
                         "start_time": music_show.start_time,
                     }
                 )
-    elif artist_id != None:
+    elif artist_id is not None:
         artist = Artist.query.get(artist_id)
         music_shows = artist.shows
         now = datetime.now()
@@ -301,7 +256,7 @@ def create_venue_submission():
         db.session.commit()
 
         data["name"] = new_venue.name
-    except:
+    except Exception:
         error = True
         db.session.rollback()
     finally:
@@ -323,21 +278,25 @@ def create_venue_submission():
 @app.route("/venues/<venue_id>", methods=["DELETE"])
 def delete_venue(venue_id):
     # DONE: Complete this endpoint for taking a venue_id, and using
-    # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
+    # SQLAlchemy ORM to delete a record. Handle cases where the session
+    # commit could fail.
 
-    # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-    # clicking that button delete it from the db then redirect the user to the homepage
+    # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page,
+    # have it so that clicking that button delete it from the db then
+    # redirect the user to the homepage
+
     error = False
     try:
         Venue.query.filter_by(id=venue_id).delete()
         db.session.commit()
-    except:
+    except Exception:
         error = True
         db.session.rollback()
     finally:
         db.session.close()
 
     return redirect(url_for("index"))
+
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -350,9 +309,11 @@ def artists():
 
 @app.route("/artists/search", methods=["POST"])
 def search_artists():
-    # DONE: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
-    # search for "band" should return "The Wild Sax Band".
+    # DONE: implement search on artists with partial string search.
+    # Ensure it is case-insensitive.
+    # Seach for "A" should return "Guns N Petals", "Matt Quevado",
+    # and "The Wild Sax Band".
+    # Search for "band" should return "The Wild Sax Band".
 
     search_term = request.form.get("search_term")
     artists = Artist.query.filter(Artist.name.ilike("%" + search_term + "%")).all()
@@ -426,7 +387,7 @@ def edit_artist_submission(artist_id):
         artist.facebook_link = req_body["facebook_link"]
 
         db.session.commit()
-    except:
+    except Exception:
         error = True
         db.session.rollback()
     finally:
@@ -463,7 +424,7 @@ def edit_venue_submission(venue_id):
         venue.facebook_link = req_body["facebook_link"]
 
         db.session.commit()
-    except:
+    except Exception:
         error = True
         db.session.rollback()
     finally:
@@ -505,7 +466,7 @@ def create_artist_submission():
         new_artist_name = new_artist.name
         db.session.add(new_artist)
         db.session.commit()
-    except:
+    except Exception:
         error = True
         db.session.rollback()
     finally:
@@ -571,7 +532,7 @@ def create_show_submission():
         )
         db.session.add(new_show)
         db.session.commit()
-    except:
+    except Exception:
         error = True
         db.session.rollback()
     finally:
@@ -582,7 +543,7 @@ def create_show_submission():
         flash("An error occurred. Show could not be listed.")
     else:
         # on successful db insert, flash success
-        flash(f"Show was successfully listed!")
+        flash("Show was successfully listed!")
     # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
     return render_template("pages/home.html")
 

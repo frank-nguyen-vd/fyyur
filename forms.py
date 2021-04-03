@@ -5,6 +5,7 @@ from wtforms.fields.core import RadioField
 from wtforms.validators import DataRequired, AnyOf, URL
 import enum
 
+
 class ShowForm(Form):
     artist_id = StringField("artist_id")
     venue_id = StringField("venue_id")
@@ -33,6 +34,7 @@ class MusicGenre(enum.Enum):
     RocknRoll = "Rock n Roll"
     Soul = "Soul"
     Other = "Other"
+
 
 class VenueForm(Form):
     name = StringField("name", validators=[DataRequired()])
@@ -107,7 +109,6 @@ class VenueForm(Form):
 
 
 class ArtistForm(Form):
-    
     name = StringField("name", validators=[DataRequired()])
     city = StringField("city", validators=[DataRequired()])
     state = SelectField(
@@ -167,7 +168,7 @@ class ArtistForm(Form):
             ("WY", "WY"),
         ],
     )
-    phone = StringField(        
+    phone = StringField(
         # TODO implement validation logic for state
         # I dont know how to do?
         # Could you please help?
@@ -183,7 +184,7 @@ class ArtistForm(Form):
     facebook_link = StringField(
         # TODO implement enum restriction
         # I dont know how to do?
-        # Could you please help?        
+        # Could you please help?
         "facebook_link",
         validators=[URL()],
     )
