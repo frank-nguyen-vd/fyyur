@@ -118,80 +118,74 @@ def search_venues():
     )
 
 
-def find_upcoming_shows(venue_id=None, artist_id=None):
+def find_shows(venue_id=None, artist_id=None, upcoming=False):
     if venue_id is None and artist_id is None:
         return None
 
-    upcoming_shows = []
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    shows = []
     if venue_id is not None:
-        venue = Venue.query.get(venue_id)
-        music_shows = venue.shows
-        now = datetime.now()
-        for music_show in music_shows:
-            start_time = datetime.strptime(music_show.start_time, "%Y-%m-%d %H:%M:%S")
-            if start_time > now:
-                upcoming_shows.append(
-                    {
-                        "artist_id": music_show.artist_id,
-                        "artist_name": music_show.artist.name,
-                        "artist_image_link": music_show.artist.image_link,
-                        "start_time": music_show.start_time,
-                    }
+        if upcoming:
+            shows = (
+                db.session.query(
+                    MusicShow.start_time.label("start_time"),
+                    Artist.id.label("artist_id"),
+                    Artist.name.label("artist_name"),
+                    Artist.image_link.label("artist_image_link"),
                 )
+                .join(Venue)
+                .join(Artist)
+                .filter(Venue.id == venue_id)
+                .filter(MusicShow.start_time > now)
+                .all()
+            )
+
+        else:
+            shows = (
+                db.session.query(
+                    MusicShow.start_time.label("start_time"),
+                    Artist.id.label("artist_id"),
+                    Artist.name.label("artist_name"),
+                    Artist.image_link.label("artist_image_link"),
+                )
+                .join(Venue)
+                .join(Artist)
+                .filter(Venue.id == venue_id)
+                .filter(MusicShow.start_time < now)
+                .all()
+            )
+
     elif artist_id is not None:
-        artist = Artist.query.get(artist_id)
-        music_shows = artist.shows
-        now = datetime.now()
-        for music_show in music_shows:
-            start_time = datetime.strptime(music_show.start_time, "%Y-%m-%d %H:%M:%S")
-            if start_time > now:
-                upcoming_shows.append(
-                    {
-                        "venue_id": music_show.venue_id,
-                        "venue_name": music_show.venue.name,
-                        "venue_image_link": music_show.venue.image_link,
-                        "start_time": music_show.start_time,
-                    }
+        if upcoming:
+            shows = (
+                db.session.query(
+                    MusicShow.start_time.label("start_time"),
+                    Venue.id.label("venue_id"),
+                    Venue.name.label("venue_name"),
+                    Venue.image_link.label("venue_image_link"),
                 )
-    return upcoming_shows
+                .join(Artist)
+                .join(Venue)
+                .filter(Artist.id == artist_id)
+                .filter(MusicShow.start_time > now)
+                .all()
+            )
 
-
-def find_past_shows(venue_id=None, artist_id=None):
-    if venue_id is None and artist_id is None:
-        return None
-
-    past_shows = []
-    if venue_id is not None:
-        venue = Venue.query.get(venue_id)
-        music_shows = venue.shows
-        now = datetime.now()
-        for music_show in music_shows:
-            start_time = datetime.strptime(music_show.start_time, "%Y-%m-%d %H:%M:%S")
-            if start_time <= now:
-                past_shows.append(
-                    {
-                        "artist_id": music_show.artist_id,
-                        "artist_name": music_show.artist.name,
-                        "artist_image_link": music_show.artist.image_link,
-                        "start_time": music_show.start_time,
-                    }
+        else:
+            shows = (
+                db.session.query(
+                    MusicShow.start_time.label("start_time"),
+                    Venue.id.label("venue_id"),
+                    Venue.name.label("venue_name"),
+                    Venue.image_link.label("venue_image_link"),
                 )
-    elif artist_id is not None:
-        artist = Artist.query.get(artist_id)
-        music_shows = artist.shows
-        now = datetime.now()
-        for music_show in music_shows:
-            start_time = datetime.strptime(music_show.start_time, "%Y-%m-%d %H:%M:%S")
-            if start_time <= now:
-                past_shows.append(
-                    {
-                        "venue_id": music_show.venue_id,
-                        "venue_name": music_show.venue.name,
-                        "venue_image_link": music_show.venue.image_link,
-                        "start_time": music_show.start_time,
-                    }
-                )
-    return past_shows
+                .join(Artist)
+                .join(Venue)
+                .filter(Artist.id == artist_id)
+                .filter(MusicShow.start_time < now)
+                .all()
+            )
+    return shows
 
 
 @app.route("/venues/<int:venue_id>")
@@ -200,8 +194,8 @@ def show_venue(venue_id):
     # DONE: replace with real venue data from the venues table, using venue_id
 
     venue = Venue.query.get(venue_id)
-    past_shows = find_past_shows(venue_id=venue_id)
-    upcoming_shows = find_upcoming_shows(venue_id=venue_id)
+    past_shows = find_shows(venue_id=venue_id, upcoming=False)
+    upcoming_shows = find_shows(venue_id=venue_id, upcoming=True)
 
     data = {
         "id": venue.id,
@@ -336,8 +330,8 @@ def show_artist(artist_id):
     # DONE: replace with real venue data from the venues table, using venue_id
 
     artist = Artist.query.get(artist_id)
-    past_shows = find_past_shows(artist_id=artist_id)
-    upcoming_shows = find_upcoming_shows(artist_id=artist_id)
+    past_shows = find_shows(artist_id=artist_id, upcoming=False)
+    upcoming_shows = find_shows(artist_id=artist_id, upcoming=True)
 
     data = {
         "id": artist.id,

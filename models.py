@@ -8,7 +8,7 @@ class MusicShow(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     venue_id = db.Column(db.Integer, db.ForeignKey("venue.id"), nullable=False)
     artist_id = db.Column(db.Integer, db.ForeignKey("artist.id"), nullable=False)
-    start_time = db.Column(db.String(120))
+    start_time = db.Column(db.DateTime(120))
 
     def __repr__(self):
         return "<MusicShow: {}, {}, {}, {}>".format(
