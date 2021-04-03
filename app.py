@@ -260,10 +260,10 @@ def create_venue_submission():
     if error:
         # DONE: modify data to be the data object returned from db insertion
         # DONE: on unsuccessful db insert, flash an error instead.
-        flash("An error occurred. Venue " + data.name + " could not be listed.")
+        flash("An error occurred. Venue {} could not be listed.".format(data.name))
     else:
         # on successful db insert, flash success
-        flash("Venue " + request.form["name"] + " was successfully listed!")
+        flash("Venue {} was successfully listed!".format(request.form["name"]))
 
     # e.g.,
     # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
@@ -470,10 +470,12 @@ def create_artist_submission():
     if error:
         # DONE: modify data to be the data object returned from db insertion
         # DONE: on unsuccessful db insert, flash an error instead.
-        flash("An error occurred. Artist " + new_artist_name + " could not be listed.")
+        flash(
+            "An error occurred. Artist {} could not be listed.".format(new_artist_name)
+        )
     else:
         # on successful db insert, flash success
-        flash("Artist " + new_artist_name + " was successfully listed!")
+        flash("Artist {} was successfully listed!".format(new_artist_name))
 
     # e.g.,
     # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
