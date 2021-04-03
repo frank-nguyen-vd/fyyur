@@ -324,6 +324,29 @@ def search_artists():
     )
 
 
+@app.route("/artists/<artist_id>", methods=["DELETE"])
+def delete_artist(artist_id):
+    # DONE: Complete this endpoint for taking a artist_id, and using
+    # SQLAlchemy ORM to delete a record. Handle cases where the session
+    # commit could fail.
+
+    # BONUS CHALLENGE: Implement a button to delete a Artist on a Artist Page,
+    # have it so that clicking that button delete it from the db then
+    # redirect the user to the homepage
+
+    error = False
+    try:
+        Artist.query.filter_by(id=artist_id).delete()
+        db.session.commit()
+    except Exception:
+        error = True
+        db.session.rollback()
+    finally:
+        db.session.close()
+
+    return redirect(url_for("index"))
+
+
 @app.route("/artists/<int:artist_id>")
 def show_artist(artist_id):
     # shows the venue page with the given venue_id
